@@ -1,0 +1,87 @@
+Attribute VB_Name = "Module1"
+Sub Stock_Data()
+
+'Define variables
+Dim yearlyChange As Double
+Dim percentChange As Double
+Dim i  As Long
+Dim finaloccurance As String
+Dim tickerRow As Integer
+
+    tickerRow = 2
+    i = 2
+    'finaloccurance is the last occurance of a given ticker name
+    finaloccurance = Cells(Rows.Count, 1).End(xlUp).Row
+
+Range("I1").Value = "Ticker"
+Range("J1").Value = "Yearly Change"
+Range("K1").Value = "Percent Change"
+Range("L1").Value = "Total Stock Volume"
+
+    'set open price for first tickerName in column 3
+    openPrice = Cells(i, 3).Value
+
+For i = 2 To finaloccurance
+    
+        'Determine if tickers are equal and if so then collect data for the tickers that are the same
+        
+        If Cells(i, 1).Value = Cells(i + 1, 1).Value Then
+        stocktotalVolume = stocktotalVolume + Cells(i, 7).Value
+        
+        'or Else if they are different tickers then calculate/print the total volume selecting the last occurance's closing price and place the ticker in the column
+        
+            Else
+            tickerName = Cells(i, 1).Value
+        
+        'place tickerName value in ticker column
+        Range("I" & tickerRow).Value = tickerName
+        
+            stocktotalVolume = stocktotalVolume + Cells(i, 7).Value
+            Cells(i + 1, 6).Select
+            ActiveCell.Offset(-1, 0).Select
+            closePrice = ActiveCell.Value
+            
+            yearlyChange = closePrice - openPrice
+            
+            'determine if the openPrice is not 0 then calculate percentChange
+            If openPrice <> 0 Then
+            percentChange = yearlyChange / openPrice
+            Else: percentChange = 0
+        End If
+            
+        'reset openPrice for next tickerName
+        Cells(i + 1, 3).Select
+        openPrice = ActiveCell.Value
+        
+            'place yearlyChange and percentChange in their respective columns
+            Range("J" & tickerRow).Value = yearlyChange
+            Range("K" & tickerRow).Value = percentChange
+            
+            'print percentChange in percent with two decimal places
+            Range("K" & tickerRow).NumberFormat = "0.00%"
+            Range("L" & tickerRow).Value = stocktotalVolume
+            
+            'move to next row
+            tickerRow = tickerRow + 1
+            
+            'need to make sure the stocktotalVolume goes back to 0
+            stocktotalVolume = 0
+            stocktotalVolume = stocktotalVolume + Cells(i, 7).Value
+            
+    End If
+    Next i
+
+'now that all data is collected -> conditional formatting with colors
+
+For i = 2 To finaloccurance
+    If Cells(i, 10).Value > 0 Then
+    Cells(i, 10).Interior.ColorIndex = 4
+    
+    ElseIf Cells(i, 10).Value < 0 Then
+    Cells(i, 10).Interior.ColorIndex = 3
+    
+    End If
+    Next i
+
+End Sub
+
